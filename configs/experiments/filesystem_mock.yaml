@@ -1,0 +1,31 @@
+experiment:
+  name: filesystem_mock
+  seed: 42
+  interactions: 50
+
+model:
+  provider: mock
+  name: mock-agent
+  parameters:
+    drift_rate: 0.002
+    violation_probability: 0.05
+    drift_mode: gradual
+
+agent:
+  memory: persistent
+
+environment:
+  type: filesystem
+
+scenario:
+  type: normal_workload
+
+monitoring:
+  enabled: false
+
+intervention:
+  enabled: false
+
+evaluation:
+  judge:
+    enabled: false

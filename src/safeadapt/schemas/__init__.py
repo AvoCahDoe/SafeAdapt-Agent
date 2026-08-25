@@ -1,5 +1,6 @@
 """Pydantic schemas for SafeAdapt."""
 
+from safeadapt.schemas.action import AgentAction
 from safeadapt.schemas.drift import (
     DriftScore,
     DriftScoreWeights,
@@ -12,6 +13,7 @@ from safeadapt.schemas.evaluation import (
     FailureRecord,
     InterventionRecord,
 )
+from safeadapt.schemas.environment import ActionResult, VirtualFile
 from safeadapt.schemas.experiment import ExperimentConfig
 from safeadapt.schemas.goal import GoalSpecification
 from safeadapt.schemas.memory import MemoryItem, MemoryType
@@ -19,6 +21,8 @@ from safeadapt.schemas.metadata import RunMetadata
 from safeadapt.schemas.trajectory import TrajectoryRecord
 
 __all__ = [
+    "ActionResult",
+    "AgentAction",
     "AlignmentWeights",
     "DriftScore",
     "DriftScoreWeights",
@@ -33,4 +37,5 @@ __all__ = [
     "MemoryType",
     "RunMetadata",
     "TrajectoryRecord",
+    "VirtualFile",
 ]

@@ -5,6 +5,7 @@ from pathlib import Path
 import typer
 
 from safeadapt.config.loader import load_experiment_config
+from safeadapt.experiments.runner import run_experiment_sync
 from safeadapt.experiments.storage import ExperimentRun
 from safeadapt.logging.setup import setup_logging
 from safeadapt.seeds.manager import SeedManager
@@ -57,11 +58,13 @@ def run(
 
     setup_logging(level="INFO", run_dir=run_path)
 
-    typer.echo(f"Experiment run initialized: {run_path.resolve()}")
+    summary = run_experiment_sync(config, experiment_run, seed_manager)
+
+    typer.echo(f"Experiment run complete: {run_path.resolve()}")
     typer.echo(f"  Experiment ID: {experiment_run.experiment_id}")
-    typer.echo(f"  Seed: {config.experiment.seed}")
-    typer.echo(f"  Interactions: {config.experiment.interactions}")
-    typer.echo("  (Interaction loop not yet implemented — Phase 2+)")
+    typer.echo(f"  Interactions: {summary['interactions']}")
+    typer.echo(f"  Violations: {summary['violations']}")
+    typer.echo(f"  Task completion rate: {summary['task_completion_rate']:.2%}")
 
 
 @app.command()
