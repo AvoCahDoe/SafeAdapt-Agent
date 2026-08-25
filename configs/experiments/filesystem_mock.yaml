@@ -21,7 +21,9 @@ scenario:
   type: normal_workload
 
 monitoring:
-  enabled: false
+  enabled: true
+  window_size: 20
+  detector: rolling
 
 intervention:
   enabled: false

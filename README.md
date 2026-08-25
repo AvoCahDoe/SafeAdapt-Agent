@@ -4,9 +4,9 @@ Research prototype for studying **alignment drift in continually interacting LLM
 
 ## Status
 
-**Phase 3 (Agent + Interaction Loop)** — filesystem environment, mock model, memory, validation, and full interaction loop.
+**Phase 5 (Drift Detection)** — evaluation (safety, performance, alignment), behavioral features, and drift detectors (rolling, CUSUM, JSD) integrated into the interaction loop.
 
-Phases 1–3 complete. Phase 4 (evaluation) is next.
+Phases 1–5 complete. Phase 6 (interventions) is next.
 
 ## Setup
 
@@ -24,7 +24,10 @@ Copy `.env.example` to `.env` and fill in API keys when running real LLM experim
 # Initialize experiment directories
 safeadapt init
 
-# Run a mock filesystem experiment (50 interactions)
+# Run a mock filesystem experiment with drift monitoring
+safeadapt run configs/experiments/filesystem_drift.yaml
+
+# Run mock experiment (50 interactions)
 safeadapt run configs/experiments/filesystem_mock.yaml
 
 # Run foundation config (also works)

@@ -10,10 +10,13 @@ from safeadapt.agents.validation import validate_action
 from safeadapt.benchmark.scenarios import create_scenario
 from safeadapt.benchmark.tasks import get_task_for_interaction
 from safeadapt.environments import create_environment
+from safeadapt.evaluation.evaluator import create_evaluator
 from safeadapt.experiments.storage import ExperimentRun
 from safeadapt.models.llm import LLMProvider
 from safeadapt.models.mock import MockLLMProvider
+from safeadapt.monitoring.detector import DriftMonitor
 from safeadapt.schemas.action import AgentAction
+from safeadapt.schemas.drift import DriftThresholds
 from safeadapt.schemas.experiment import ExperimentConfig, MemoryMode
 from safeadapt.schemas.memory import MemoryType
 from safeadapt.schemas.trajectory import TrajectoryRecord
@@ -59,12 +62,24 @@ class ExperimentRunner:
             memory_mode=config.agent.memory,
             tools=self.environment.get_available_tools(),
         )
+        self.evaluator = create_evaluator(config, self.scenario.goal)
+        self.drift_monitor: DriftMonitor | None = None
+        if config.monitoring.enabled:
+            thresholds = DriftThresholds.model_validate(config.monitoring.drift_thresholds or {})
+            self.drift_monitor = DriftMonitor(
+                window_size=config.monitoring.window_size,
+                detector_type=config.monitoring.detector,
+                thresholds=thresholds,
+                weights=config.monitoring.drift_weights or None,
+            )
         self._stats: dict[str, Any] = {
             "interactions": 0,
             "violations": 0,
             "successful_actions": 0,
             "rejected_actions": 0,
             "tasks_completed": 0,
+            "drift_detections": 0,
+            "mean_alignment": 0.0,
         }
 
     async def run(self) -> dict[str, Any]:
@@ -158,6 +173,15 @@ class ExperimentRunner:
         self.experiment_run.append_trajectory(record)
         self._stats["interactions"] += 1
 
+        eval_record = self.evaluator.evaluate_interaction(record)
+        self.experiment_run.append_evaluation(eval_record)
+
+        if self.drift_monitor is not None:
+            drift_score = self.drift_monitor.update(record, eval_record.overall_alignment)
+            self.experiment_run.append_drift(drift_score)
+            if drift_score.is_drifting:
+                self._stats["drift_detections"] += 1
+
     def _build_summary(self) -> dict[str, Any]:
         """Build experiment run summary."""
         n = self._stats["interactions"] or 1
@@ -166,6 +190,8 @@ class ExperimentRunner:
             "violation_rate": self._stats["violations"] / n,
             "task_completion_rate": self._stats["tasks_completed"] / n,
             "action_success_rate": self._stats["successful_actions"] / n,
+            "mean_alignment": self.evaluator.mean_alignment,
+            "performance": self.evaluator.performance.to_dict(),
         }
 
 
