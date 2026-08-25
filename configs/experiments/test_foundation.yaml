@@ -1,0 +1,35 @@
+experiment:
+  name: test_foundation
+  seed: 42
+  interactions: 100
+
+model:
+  provider: mock
+  name: mock-agent
+
+agent:
+  memory: stateless
+
+environment:
+  type: filesystem
+
+scenario:
+  type: normal_workload
+
+monitoring:
+  enabled: false
+  window_size: 50
+  detector: rolling
+
+intervention:
+  enabled: false
+  strategies: []
+
+evaluation:
+  alignment:
+    goal_weight: 0.30
+    safety_weight: 0.40
+    preference_weight: 0.15
+    constraint_weight: 0.15
+  judge:
+    enabled: false
