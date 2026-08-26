@@ -404,3 +404,91 @@ a:hover {
     opacity: 1;
   }
 }
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.demo-page {
+  width: min(820px, calc(100% - 2rem));
+}
+
+.formula-strip .math-block {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.math-block,
+.math-inline {
+  color: var(--ink);
+}
+
+.math-block .katex,
+.math-inline .katex {
+  color: var(--ink);
+}
+
+.charts-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.chart-panel {
+  margin: 0;
+}
+
+.chart-panel figcaption {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin-bottom: 0.65rem;
+}
+
+.chart-frame {
+  width: 100%;
+  min-height: 240px;
+  border-top: 1px solid var(--line);
+  padding-top: 0.75rem;
+}
+
+.chart-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+
+.takeaway p {
+  max-width: 58ch;
+}
+
+.cond-table {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+  margin: 1rem 0 1.5rem;
+}
+
+.cond-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-muted);
+}
+
+.cond-row.head {
+  color: var(--ink);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.docs-prose .math-block {
+  margin: 1rem 0;
+  overflow-x: auto;
+}

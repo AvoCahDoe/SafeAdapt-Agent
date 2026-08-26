@@ -1,5 +1,8 @@
 import { readFile } from "fs/promises";
 import path from "path";
+import Link from "next/link";
+import { Formula } from "@/components/Math";
+import { ResultsCharts, type SeriesPoint } from "@/components/ResultsCharts";
 
 type Metrics = {
   conditions?: Record<
@@ -15,95 +18,77 @@ type Metrics = {
   headline?: string;
 };
 
-async function loadMetrics(): Promise<Metrics | null> {
+type SeriesFile = {
+  series: SeriesPoint[];
+};
+
+async function loadJson<T>(rel: string): Promise<T | null> {
   try {
-    const p = path.join(process.cwd(), "public", "showcase", "metrics.json");
-    const raw = await readFile(p, "utf8");
-    return JSON.parse(raw) as Metrics;
+    const p = path.join(process.cwd(), "public", "showcase", rel);
+    return JSON.parse(await readFile(p, "utf8")) as T;
   } catch {
     return null;
   }
 }
 
-const PLOTS = [
-  {
-    src: "/showcase/08_condition_comparison.png",
-    caption: "Condition comparison (C1 vs C5)",
-  },
-  { src: "/showcase/01_alignment.png", caption: "Alignment over interactions" },
-  { src: "/showcase/03_drift.png", caption: "Drift signal" },
-  {
-    src: "/showcase/04_drift_interventions.png",
-    caption: "Drift and interventions",
-  },
-];
-
 export default async function ResultsPage() {
-  const metrics = await loadMetrics();
+  const metrics = await loadJson<Metrics>("metrics.json");
+  const seriesFile = await loadJson<SeriesFile>("demo_series.json");
   const c1 = metrics?.conditions?.C1;
   const c5 = metrics?.conditions?.C5;
+  const series = seriesFile?.series ?? [];
 
   return (
-    <main className="page">
-      <h1 className="page-title">Results showcase</h1>
+    <main className="page demo-page">
+      <p className="eyebrow">Portfolio demo</p>
+      <h1 className="page-title">Results</h1>
       <p className="page-lead">
-        {metrics?.headline ||
-          "Pre-baked mock matrix sample: C1 (stateless baseline) versus C5 (SafeAdapt full stack)."}
+        One comparison: a stateless baseline (<strong>C1</strong>) versus
+        SafeAdapt with monitoring and interventions (<strong>C5</strong>).
       </p>
 
-      {(c1 || c5) && (
-        <section className="section">
-          <h2>Key metrics</h2>
-          <div className="metrics-grid">
-            <div className="metric">
-              <span className="metric-label">C1 mean alignment</span>
-              <span className="metric-value">{fmt(c1?.mean_alignment)}</span>
-            </div>
-            <div className="metric">
-              <span className="metric-label">C5 mean alignment</span>
-              <span className="metric-value">{fmt(c5?.mean_alignment)}</span>
-            </div>
-            <div className="metric">
-              <span className="metric-label">C1 violation rate</span>
-              <span className="metric-value">{fmt(c1?.violation_rate)}</span>
-            </div>
-            <div className="metric">
-              <span className="metric-label">C5 violation rate</span>
-              <span className="metric-value">{fmt(c5?.violation_rate)}</span>
-            </div>
-            <div className="metric">
-              <span className="metric-label">C5 interventions</span>
-              <span className="metric-value">
-                {c5?.intervention_count ?? "—"}
-              </span>
-            </div>
-            <div className="metric">
-              <span className="metric-label">C5 drift detections</span>
-              <span className="metric-value">
-                {c5?.drift_detections ?? "—"}
-              </span>
-            </div>
-          </div>
-        </section>
-      )}
+      <section className="section formula-strip">
+        <h2>What we measure</h2>
+        <p className="muted">
+          Alignment is a weighted mix of goal, safety, preference, and
+          constraint adherence. Drift combines behavioral change, alignment
+          drop, and violation rise.
+        </p>
+        <Formula
+          block
+          tex="A_t = \frac{w_g G_t + w_s S_t + w_p P_t + w_c C_t}{w_g + w_s + w_p + w_c}"
+        />
+        <Formula
+          block
+          tex="D_t = \alpha\, d_{\mathrm{beh}} + \beta\, (1 - A_t) + \gamma\, \Delta v_t"
+        />
+        <p className="muted">
+          Defaults:{" "}
+          <Formula tex="\alpha=0.4,\;\beta=0.35,\;\gamma=0.25" />. Full write-up
+          in <Link href="/docs">Docs</Link>.
+        </p>
+      </section>
 
       <section className="section">
-        <h2>Plots</h2>
-        <div className="plot-grid">
-          {PLOTS.map((p) => (
-            <figure key={p.src}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.src} alt={p.caption} />
-              <figcaption>{p.caption}</figcaption>
-            </figure>
-          ))}
-        </div>
+        <h2>Demo charts</h2>
+        <ResultsCharts c1={c1} c5={c5} series={series} />
+      </section>
+
+      <section className="section takeaway">
+        <h2>Takeaway</h2>
+        <p>
+          C5 turns on drift flags and interventions (
+          {fmtAvg(c5?.drift_detections)} detections,{" "}
+          {fmtAvg(c5?.intervention_count)} interventions on average in the mock
+          matrix). Explore the live runner on <Link href="/try">Try it</Link>,
+          or read the method in <Link href="/docs">Docs</Link>.
+        </p>
       </section>
     </main>
   );
 }
 
-function fmt(n: number | undefined): string {
+function fmtAvg(n: number | undefined): string {
   if (n === undefined || Number.isNaN(n)) return "—";
-  return n.toFixed(3);
+  return String(Math.round(n * 10) / 10);
 }

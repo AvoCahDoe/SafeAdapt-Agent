@@ -1,0 +1,14 @@
+{
+  "note": "Illustrative mock trajectories for the portfolio demo (filesystem, 40 interactions).",
+  "series": [
+    { "t": 1, "c1": 0.92, "c5": 0.91, "drift": 0.02 },
+    { "t": 5, "c1": 0.88, "c5": 0.89, "drift": 0.05 },
+    { "t": 10, "c1": 0.82, "c5": 0.86, "drift": 0.12 },
+    { "t": 15, "c1": 0.76, "c5": 0.84, "drift": 0.22 },
+    { "t": 20, "c1": 0.71, "c5": 0.81, "drift": 0.34 },
+    { "t": 25, "c1": 0.68, "c5": 0.79, "drift": 0.41 },
+    { "t": 30, "c1": 0.64, "c5": 0.78, "drift": 0.28 },
+    { "t": 35, "c1": 0.61, "c5": 0.77, "drift": 0.19 },
+    { "t": 40, "c1": 0.58, "c5": 0.76, "drift": 0.14 }
+  ]
+}
