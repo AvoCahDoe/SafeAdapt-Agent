@@ -43,7 +43,7 @@ export default async function DocsPage() {
       <h1 className="page-title">Docs</h1>
       <p className="page-lead">
         How SafeAdapt thinks about alignment drift — motivation, setup,
-        formulas, and demo figures for a portfolio walkthrough.
+        formulas, and demo figures.
       </p>
       <nav className="toc" aria-label="On this page">
         <a href="#motivation">Motivation</a>
@@ -310,8 +310,8 @@ PYTHONPATH=src python scripts/export_showcase.py`}</pre>
           </a>
         </p>
         <p>
-          Portfolio walkthrough: <Link href="/results">Results</Link> →{" "}
-          <Link href="/try">Try it</Link> (mock C1 vs C5).
+          Walkthrough: <Link href="/results">Results</Link> →{" "}
+          <Link href="/try">Try it</Link> (compare mock C1 vs C5).
         </p>
       </section>
     </main>

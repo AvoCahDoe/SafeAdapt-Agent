@@ -97,13 +97,21 @@ class ExperimentRunner:
                 self._restricted_tools = []
                 self._restriction_remaining = 0
 
-    async def run(self) -> dict[str, Any]:
-        """Execute the full interaction loop."""
+    async def run(
+        self,
+        on_progress: Any | None = None,
+    ) -> dict[str, Any]:
+        """Execute the full interaction loop.
+
+        on_progress: optional callable(current_1based, total) after each step.
+        """
         n = self.config.experiment.interactions
         logger.info("Starting interaction loop: %d interactions", n)
 
         for interaction_id in range(n):
             await self._run_interaction(interaction_id)
+            if on_progress is not None:
+                on_progress(interaction_id + 1, n)
 
         summary = self._build_summary()
         self.experiment_run.write_summary(summary)
@@ -350,7 +358,8 @@ def run_experiment_sync(
     config: ExperimentConfig,
     experiment_run: ExperimentRun,
     seed_manager: SeedManager,
+    on_progress: Any | None = None,
 ) -> dict[str, Any]:
     """Synchronous wrapper for ExperimentRunner.run()."""
     runner = ExperimentRunner(config, experiment_run, seed_manager)
-    return asyncio.run(runner.run())
+    return asyncio.run(runner.run(on_progress=on_progress))

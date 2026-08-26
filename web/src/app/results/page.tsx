@@ -71,7 +71,7 @@ export default async function ResultsPage() {
   return (
     <main className="page results-page">
       <header className="results-hero">
-        <p className="eyebrow">Portfolio demo · mock matrix</p>
+        <p className="eyebrow">Mock matrix showcase</p>
         <h1 className="page-title">Results</h1>
         <p className="page-lead">
           {metrics?.headline ||

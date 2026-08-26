@@ -508,11 +508,52 @@ a:hover {
   font-size: 0.92rem;
 }
 
-.metric-hint {
-  display: block;
-  margin-top: 0.2rem;
-  font-size: 0.75rem;
+.progress-block {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
   color: var(--ink-muted);
+}
+
+.progress-track {
+  height: 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.35s ease;
+}
+
+.try-plots .plot-card figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.try-plots .plot-card figcaption strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.try-plots .plot-card figcaption span {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.plot-card {
+  margin: 0;
 }
 
 .docs-charts {

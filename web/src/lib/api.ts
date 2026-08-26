@@ -35,12 +35,19 @@ export type RunSummary = {
   [key: string]: unknown;
 };
 
+export type RunProgress = {
+  current: number;
+  total: number;
+  pct: number;
+};
+
 export type RunResponse = {
   run_id: string;
   status: "queued" | "running" | "completed" | "failed";
   request?: RunRequest;
   summary?: RunSummary | null;
   plots?: Record<string, string>;
+  progress?: RunProgress | null;
   error?: string | null;
   created_at?: string;
   finished_at?: string;

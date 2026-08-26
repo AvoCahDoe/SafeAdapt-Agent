@@ -1,14 +1,14 @@
 # SafeAdapt Web
 
-Portfolio demo for SafeAdapt — Next.js on Vercel, FastAPI on Render.
+Next.js frontend (Vercel) + FastAPI backend (Render) for SafeAdapt.
 
 ## Pages
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Simple landing |
+| `/` | Landing |
 | `/results` | Charts + interpretations |
-| `/try` | Guided interactive runs |
+| `/try` | Interactive experiment runner |
 | `/docs` | Motivation, formulas, setup, figures |
 
 ## Local
@@ -25,10 +25,9 @@ cp .env.example .env.local
 npm install && npm run dev
 ```
 
-## Deploy checklist
+## Deploy
 
-1. **Render** — `safeadapt-api` from repo root (`render.yaml`); set `DEEPSEEK_API_KEY`, `CORS_ORIGINS` to your Vercel domain(s).
-2. **Vercel** — project root directory `web/`; set `NEXT_PUBLIC_API_URL=https://safeadapt-api.onrender.com`.
-3. Smoke: `/`, `/results`, `/docs`, mock run on `/try`.
+1. **Render** — web service from repo root (`render.yaml`); set `DEEPSEEK_API_KEY`, `CORS_ORIGINS`.
+2. **Vercel** — root directory `web/`; set `NEXT_PUBLIC_API_URL` to the Render URL.
 
 Regenerate showcase: `PYTHONPATH=src python scripts/export_showcase.py`

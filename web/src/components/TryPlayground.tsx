@@ -6,6 +6,7 @@ import {
   Condition,
   Environment,
   Provider,
+  RunProgress,
   RunResponse,
   fetchCapabilities,
   getRun,
@@ -19,45 +20,52 @@ const ENV_HELP: Record<Environment, string> = {
   research_assistant: "Agent answers research tasks; may see injected docs.",
 };
 
-type Preset = {
-  id: string;
-  title: string;
-  blurb: string;
-  provider: Provider;
-  environment: Environment;
-  condition: Condition;
-  interactions: number;
-  seed: number;
-  monitor: boolean;
-  intervene: boolean;
+const PLOT_INFO: Record<string, { title: string; meaning: string }> = {
+  "01_alignment.png": {
+    title: "Alignment over time",
+    meaning:
+      "Overall alignment Aₜ at each interaction. Higher means closer to goal, safety, preference, and constraint targets.",
+  },
+  "02_violations.png": {
+    title: "Violations",
+    meaning:
+      "When objective constraint violations occur across the run. Spikes indicate safety/policy breaches.",
+  },
+  "03_drift.png": {
+    title: "Drift score",
+    meaning:
+      "Combined drift Dₜ from behavior change, alignment drop, and violation rise. Used by the monitor.",
+  },
+  "04_drift_interventions.png": {
+    title: "Drift & interventions",
+    meaning:
+      "Drift trajectory with intervention markers. Shows when SafeAdapt acted after a detection.",
+  },
+  "05_performance_vs_safety.png": {
+    title: "Performance vs safety",
+    meaning:
+      "Trade-off view of task/useful work against safety-related outcomes for this run.",
+  },
+  "06_lead_time.png": {
+    title: "Lead time",
+    meaning:
+      "How early drift signals appear relative to later failures or violations (when data allows).",
+  },
+  "07_action_distribution.png": {
+    title: "Action distribution",
+    meaning:
+      "Which tools/actions the agent chose before vs after drift signals (when available).",
+  },
+  "08_condition_comparison.png": {
+    title: "Condition comparison",
+    meaning: "Aggregate comparison across experimental conditions.",
+  },
+  "09_intervention_recovery.png": {
+    title: "Intervention recovery",
+    meaning:
+      "Alignment just before vs after interventions — whether the control loop recovers Aₜ.",
+  },
 };
-
-const PRESETS: Preset[] = [
-  {
-    id: "quick-c1",
-    title: "Baseline (C1)",
-    blurb: "No memory, no monitoring — see the control case.",
-    provider: "mock",
-    environment: "filesystem",
-    condition: "C1",
-    interactions: 10,
-    seed: 42,
-    monitor: false,
-    intervene: false,
-  },
-  {
-    id: "quick-c5",
-    title: "SafeAdapt (C5)",
-    blurb: "Full stack: detect drift and intervene.",
-    provider: "mock",
-    environment: "filesystem",
-    condition: "C5",
-    interactions: 10,
-    seed: 42,
-    monitor: true,
-    intervene: true,
-  },
-];
 
 export function TryPlayground() {
   const [caps, setCaps] = useState<Capabilities | null>(null);
@@ -65,7 +73,7 @@ export function TryPlayground() {
   const [provider, setProvider] = useState<Provider>("mock");
   const [environment, setEnvironment] = useState<Environment>("filesystem");
   const [condition, setCondition] = useState<Condition>("C5");
-  const [interactions, setInteractions] = useState(10);
+  const [interactions, setInteractions] = useState(12);
   const [seed, setSeed] = useState(42);
   const [monitor, setMonitor] = useState(true);
   const [intervene, setIntervene] = useState(true);
@@ -73,10 +81,9 @@ export function TryPlayground() {
   const [phase, setPhase] = useState<"idle" | "queued" | "running" | "done">(
     "idle"
   );
+  const [progress, setProgress] = useState<RunProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<RunResponse | null>(null);
-  const [activePreset, setActivePreset] = useState<string>("quick-c5");
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     fetchCapabilities()
@@ -91,30 +98,22 @@ export function TryPlayground() {
 
   const maxIx =
     caps?.max_interactions?.[provider] ?? (provider === "deepseek" ? 8 : 30);
-
   const safeInteractions = Math.min(interactions, maxIx);
 
   const estimate = useMemo(() => {
-    if (provider === "mock") return "Usually a few seconds";
-    return "Often 30–90s (API cold start + LLM calls)";
-  }, [provider]);
+    if (provider === "mock") {
+      if (safeInteractions >= 20) return "Larger mock runs may take 10–40s";
+      return "Mock runs usually finish in a few seconds";
+    }
+    return "Live LLM runs are slower (often 30–120s+)";
+  }, [provider, safeInteractions]);
 
-  function applyPreset(p: Preset) {
-    setActivePreset(p.id);
-    setProvider(p.provider);
-    setEnvironment(p.environment);
-    setCondition(p.condition);
-    setInteractions(p.interactions);
-    setSeed(p.seed);
-    setMonitor(p.monitor);
-    setIntervene(p.intervene);
-    setError(null);
-  }
-
-  async function runExperiment() {
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setBusy(true);
     setError(null);
     setResult(null);
+    setProgress({ current: 0, total: safeInteractions, pct: 0 });
     setPhase("queued");
     try {
       let run = await startRun({
@@ -127,20 +126,32 @@ export function TryPlayground() {
         enable_intervention: condition === "C5" ? intervene : false,
       });
 
+      if (run.progress) setProgress(run.progress);
       setPhase(run.status === "completed" ? "done" : "running");
-      const deadline = Date.now() + (provider === "deepseek" ? 180_000 : 90_000);
+
+      const deadline =
+        Date.now() +
+        (provider === "deepseek"
+          ? 240_000
+          : Math.max(90_000, safeInteractions * 2500));
+
       while (
         (run.status === "queued" || run.status === "running") &&
         Date.now() < deadline
       ) {
         setPhase(run.status === "queued" ? "queued" : "running");
-        await new Promise((r) => setTimeout(r, 1500));
+        if (run.progress) setProgress(run.progress);
+        await new Promise((r) => setTimeout(r, 800));
         run = await getRun(run.run_id);
       }
+
+      if (run.progress) setProgress(run.progress);
       setResult(run);
       setPhase("done");
       if (run.status === "failed") {
         setError(run.error || "Run failed");
+      } else if (run.status === "queued" || run.status === "running") {
+        setError("Timed out waiting for the run to finish. Try fewer interactions.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -150,291 +161,270 @@ export function TryPlayground() {
     }
   }
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    await runExperiment();
-  }
-
   const summary = result?.summary;
   const plots = result?.plots || {};
-  const plotEntries = Object.entries(plots).slice(0, 4);
+  const plotEntries = Object.entries(plots);
+  const pct = progress?.pct ?? 0;
+  const showDetailedProgress = busy || phase === "running" || phase === "queued";
 
   return (
     <div className="try-layout">
-      <div className="try-controls">
+      <form className="try-form try-controls" onSubmit={onSubmit}>
         <section className="try-step">
-          <h2 className="try-step-title">
-            <span className="step-num">1</span> Pick a quick start
-          </h2>
+          <h2 className="try-step-title">Configure</h2>
           <p className="muted try-step-help">
-            Best for a portfolio demo: run mock C1, then C5, and compare.
+            Choose provider, condition, environment, and horizon. You control
+            every setting.
           </p>
-          <div className="preset-row">
-            {PRESETS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className={`preset-card ${activePreset === p.id ? "active" : ""}`}
-                onClick={() => applyPreset(p)}
-                disabled={busy}
-              >
-                <strong>{p.title}</strong>
-                <span>{p.blurb}</span>
-              </button>
-            ))}
-          </div>
-        </section>
 
-        <form className="try-form" onSubmit={onSubmit}>
-          <section className="try-step">
-            <h2 className="try-step-title">
-              <span className="step-num">2</span> Confirm settings
-            </h2>
+          <label>
+            Provider
+            <select
+              value={provider}
+              onChange={(e) => setProvider(e.target.value as Provider)}
+              disabled={busy}
+            >
+              <option value="mock">Mock (deterministic, fast)</option>
+              <option value="deepseek" disabled={!caps?.deepseek_available}>
+                DeepSeek (live LLM)
+              </option>
+            </select>
+            <span className="form-hint">{estimate}</span>
+          </label>
 
-            <div className="choice-row">
-              <button
-                type="button"
-                className={`choice-pill ${provider === "mock" ? "active" : ""}`}
-                onClick={() => {
-                  setProvider("mock");
-                  setActivePreset("");
-                }}
-                disabled={busy}
-              >
-                Mock · fast
-              </button>
-              <button
-                type="button"
-                className={`choice-pill ${provider === "deepseek" ? "active" : ""}`}
-                onClick={() => {
-                  setProvider("deepseek");
-                  setActivePreset("");
-                }}
-                disabled={busy || !caps?.deepseek_available}
-                title={
-                  caps?.deepseek_available
-                    ? "Live DeepSeek LLM (slower)"
-                    : "DeepSeek unavailable on API"
-                }
-              >
-                DeepSeek · live LLM
-              </button>
-            </div>
-            <p className="form-hint">{estimate}</p>
+          <label>
+            Environment
+            <select
+              value={environment}
+              onChange={(e) =>
+                setEnvironment(e.target.value as Environment)
+              }
+              disabled={busy}
+            >
+              {(caps?.environments || Object.keys(ENV_HELP)).map((env) => (
+                <option key={env} value={env}>
+                  {env.replace(/_/g, " ")}
+                </option>
+              ))}
+            </select>
+            <span className="form-hint">{ENV_HELP[environment]}</span>
+          </label>
 
-            <fieldset className="radio-row">
-              <legend>What to compare</legend>
-              <label className={`choice-block ${condition === "C1" ? "on" : ""}`}>
-                <input
-                  type="radio"
-                  name="condition"
-                  checked={condition === "C1"}
-                  onChange={() => {
-                    setCondition("C1");
-                    setActivePreset("");
-                  }}
-                />
-                <span>
-                  <strong>C1 — Baseline</strong>
-                  <em>Stateless agent, no drift monitor</em>
-                </span>
-              </label>
-              <label className={`choice-block ${condition === "C5" ? "on" : ""}`}>
-                <input
-                  type="radio"
-                  name="condition"
-                  checked={condition === "C5"}
-                  onChange={() => {
-                    setCondition("C5");
-                    setActivePreset("");
-                  }}
-                />
-                <span>
-                  <strong>C5 — SafeAdapt</strong>
-                  <em>Monitor drift + intervene when needed</em>
-                </span>
-              </label>
-            </fieldset>
-
-            <label>
-              How many interactions?{" "}
-              <strong className="accent-text">{safeInteractions}</strong>
+          <fieldset className="radio-row">
+            <legend>Condition</legend>
+            <label className={`choice-block ${condition === "C1" ? "on" : ""}`}>
               <input
-                type="range"
-                min={3}
-                max={maxIx}
-                value={safeInteractions}
-                onChange={(e) => {
-                  setInteractions(Number(e.target.value));
-                  setActivePreset("");
-                }}
+                type="radio"
+                name="condition"
+                checked={condition === "C1"}
+                disabled={busy}
+                onChange={() => setCondition("C1")}
               />
-              <span className="range-ends">
-                <span>3</span>
-                <span>max {maxIx}</span>
+              <span>
+                <strong>C1 — Baseline</strong>
+                <em>Stateless agent, no drift monitor or interventions</em>
               </span>
             </label>
+            <label className={`choice-block ${condition === "C5" ? "on" : ""}`}>
+              <input
+                type="radio"
+                name="condition"
+                checked={condition === "C5"}
+                disabled={busy}
+                onChange={() => setCondition("C5")}
+              />
+              <span>
+                <strong>C5 — SafeAdapt</strong>
+                <em>Persistent memory, drift detection, interventions</em>
+              </span>
+            </label>
+          </fieldset>
 
-            <button
-              type="button"
-              className="linkish"
-              onClick={() => setShowAdvanced((v) => !v)}
-            >
-              {showAdvanced ? "Hide advanced" : "Show advanced"}
-            </button>
+          <label>
+            Interactions:{" "}
+            <strong className="accent-text">{safeInteractions}</strong>
+            <input
+              type="range"
+              min={1}
+              max={maxIx}
+              value={safeInteractions}
+              disabled={busy}
+              onChange={(e) => setInteractions(Number(e.target.value))}
+            />
+            <span className="range-ends">
+              <span>1</span>
+              <span>max {maxIx}</span>
+            </span>
+            {safeInteractions >= 15 && (
+              <span className="form-hint">
+                Longer runs stream progress while the API works through each
+                interaction.
+              </span>
+            )}
+          </label>
 
-            {showAdvanced && (
-              <div className="advanced-block">
-                <label>
-                  Environment
-                  <select
-                    value={environment}
-                    onChange={(e) => {
-                      setEnvironment(e.target.value as Environment);
-                      setActivePreset("");
-                    }}
-                  >
-                    {(caps?.environments || Object.keys(ENV_HELP)).map((env) => (
-                      <option key={env} value={env}>
-                        {env.replace(/_/g, " ")}
-                      </option>
-                    ))}
-                  </select>
-                  <span className="form-hint">{ENV_HELP[environment]}</span>
-                </label>
-                <label>
-                  Random seed
-                  <input
-                    type="number"
-                    value={seed}
-                    onChange={(e) => {
-                      setSeed(Number(e.target.value));
-                      setActivePreset("");
-                    }}
-                  />
-                </label>
-                {condition === "C5" && (
-                  <div className="toggle-row">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={monitor}
-                        onChange={(e) => setMonitor(e.target.checked)}
-                      />
-                      Enable drift monitoring
-                    </label>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={intervene}
-                        onChange={(e) => setIntervene(e.target.checked)}
-                      />
-                      Enable interventions
-                    </label>
-                  </div>
-                )}
+          <label>
+            Seed
+            <input
+              type="number"
+              value={seed}
+              disabled={busy}
+              onChange={(e) => setSeed(Number(e.target.value))}
+            />
+            <span className="form-hint">
+              Same seed + settings → reproducible mock behavior.
+            </span>
+          </label>
+
+          {condition === "C5" && (
+            <div className="toggle-row">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={monitor}
+                  disabled={busy}
+                  onChange={(e) => setMonitor(e.target.checked)}
+                />
+                Drift monitoring
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={intervene}
+                  disabled={busy}
+                  onChange={(e) => setIntervene(e.target.checked)}
+                />
+                Interventions
+              </label>
+            </div>
+          )}
+        </section>
+
+        <section className="try-step">
+          <h2 className="try-step-title">Run</h2>
+          <button type="submit" className="btn primary try-run" disabled={busy}>
+            {busy ? "Running…" : "Run experiment"}
+          </button>
+
+          {showDetailedProgress && (
+            <div className="progress-block" aria-live="polite">
+              <div className="progress-meta">
+                <span>
+                  {phase === "queued"
+                    ? "Queued…"
+                    : `Interaction ${progress?.current ?? 0} / ${progress?.total ?? safeInteractions}`}
+                </span>
+                <span>{pct.toFixed(0)}%</span>
               </div>
-            )}
-          </section>
+              <div
+                className="progress-track"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={pct}
+              >
+                <div
+                  className="progress-fill"
+                  style={{ width: `${Math.min(100, Math.max(2, pct))}%` }}
+                />
+              </div>
+              <p className="form-hint">{estimate}</p>
+            </div>
+          )}
 
-          <section className="try-step">
-            <h2 className="try-step-title">
-              <span className="step-num">3</span> Run
-            </h2>
-            <button type="submit" className="btn primary try-run" disabled={busy}>
-              {busy ? "Running experiment…" : "Run experiment"}
-            </button>
-            {busy && (
-              <p className="pulse">
-                {phase === "queued"
-                  ? "Queued on the API…"
-                  : "Running interactions…"}
-              </p>
-            )}
-            {capsError && (
-              <p className="form-hint warn">
-                API unreachable right now ({capsError}). The free API may be
-                waking from sleep — wait ~30s and try again.
-              </p>
-            )}
-            {error && <p className="form-hint warn">{error}</p>}
-          </section>
-        </form>
-      </div>
+          {capsError && (
+            <p className="form-hint warn">
+              API unreachable ({capsError}). If the service was idle it may need
+              ~30s to wake — retry shortly.
+            </p>
+          )}
+          {error && <p className="form-hint warn">{error}</p>}
+        </section>
+      </form>
 
       <div className="try-output" aria-live="polite">
         <h2 className="try-output-title">Results</h2>
         {!result && !busy && (
           <div className="try-empty">
             <p>
-              Nothing yet. Start with <strong>SafeAdapt (C5)</strong>, then run{" "}
-              <strong>Baseline (C1)</strong> with the same seed to compare.
+              Configure a run on the left. Metrics and plots appear here when
+              the experiment finishes.
             </p>
-            <ul className="try-tips">
-              <li>Mock = free &amp; instant (best for demos)</li>
-              <li>DeepSeek = real LLM, capped &amp; slower</li>
-              <li>Watch alignment, violations, and interventions below</li>
-            </ul>
           </div>
         )}
         {busy && (
           <div className="try-empty">
-            <p className="pulse">Experiment in progress…</p>
-            <p className="muted">{estimate}</p>
+            <p className="pulse">
+              {phase === "queued"
+                ? "Waiting for the API…"
+                : `Working through interaction ${(progress?.current ?? 0) || 1} of ${progress?.total ?? safeInteractions}…`}
+            </p>
+            <div className="progress-block">
+              <div className="progress-track">
+                <div
+                  className="progress-fill"
+                  style={{ width: `${Math.min(100, Math.max(2, pct))}%` }}
+                />
+              </div>
+            </div>
           </div>
         )}
         {summary && (
           <>
             <p className="try-result-banner">
-              Finished <code>{condition}</code> · {provider} · {safeInteractions}{" "}
-              interactions · seed {seed}
+              Finished <code>{condition}</code> · {provider} ·{" "}
+              {safeInteractions} interactions · seed {seed}
             </p>
             <div className="metrics-grid">
               <Metric
                 label="Mean alignment"
                 value={fmt(summary.mean_alignment)}
-                hint="Higher is better"
+                hint="Average Aₜ — higher is better"
               />
               <Metric
                 label="Violation rate"
                 value={fmt(summary.violation_rate)}
-                hint="Lower is better"
+                hint="Share of steps with objective violations"
               />
               <Metric
                 label="Drift detections"
                 value={String(summary.drift_detections ?? 0)}
-                hint="C5 monitor alerts"
+                hint="Times the monitor flagged drift"
               />
               <Metric
                 label="Interventions"
                 value={String(summary.intervention_count ?? 0)}
-                hint="Only C5 acts"
+                hint="Control actions applied (C5)"
               />
               <Metric
                 label="Tasks completed"
                 value={String(summary.tasks_completed ?? 0)}
-                hint="Useful work done"
+                hint="Successful workload steps"
               />
               <Metric
-                label="Status"
-                value={result?.status ?? "—"}
-                hint="API job state"
+                label="Task completion rate"
+                value={fmt(summary.task_completion_rate)}
+                hint="Tasks completed / interactions"
               />
             </div>
             {plotEntries.length > 0 && (
-              <div className="plot-grid">
-                {plotEntries.map(([name, b64]) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <figure key={name}>
-                    <img src={plotSrc(b64)} alt={name} />
-                    <figcaption>
-                      {name
-                        .replace(/^\d+_/, "")
-                        .replace(".png", "")
-                        .replace(/_/g, " ")}
-                    </figcaption>
-                  </figure>
-                ))}
+              <div className="plot-grid try-plots">
+                {plotEntries.map(([name, b64]) => {
+                  const info = PLOT_INFO[name] ?? {
+                    title: name.replace(/^\d+_/, "").replace(".png", "").replace(/_/g, " "),
+                    meaning: "Generated plot from this run.",
+                  };
+                  return (
+                    <figure key={name} className="plot-card">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={plotSrc(b64)} alt={info.title} />
+                      <figcaption>
+                        <strong>{info.title}</strong>
+                        <span>{info.meaning}</span>
+                      </figcaption>
+                    </figure>
+                  );
+                })}
               </div>
             )}
           </>

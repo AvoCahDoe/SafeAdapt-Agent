@@ -182,6 +182,20 @@ def _run_job(run_id: str, req: RunRequest) -> None:
 
         with _lock:
             _runs[run_id]["status"] = "running"
+            _runs[run_id]["progress"] = {
+                "current": 0,
+                "total": req.interactions,
+                "pct": 0.0,
+            }
+
+        def on_progress(current: int, total: int) -> None:
+            with _lock:
+                if run_id in _runs:
+                    _runs[run_id]["progress"] = {
+                        "current": current,
+                        "total": total,
+                        "pct": round(100.0 * current / max(total, 1), 1),
+                    }
 
         config = _build_config(req)
         tmp = Path(tempfile.mkdtemp(prefix="safeadapt_web_"))
@@ -189,7 +203,9 @@ def _run_job(run_id: str, req: RunRequest) -> None:
         seed_manager.seed_all()
         experiment_run = ExperimentRun(config, tmp)
         run_path = experiment_run.initialize()
-        summary = run_experiment_sync(config, experiment_run, seed_manager)
+        summary = run_experiment_sync(
+            config, experiment_run, seed_manager, on_progress=on_progress
+        )
         plot_paths = generate_run_plots(run_path)
 
         plots: dict[str, str] = {}
@@ -202,6 +218,11 @@ def _run_job(run_id: str, req: RunRequest) -> None:
                     "status": "completed",
                     "summary": summary,
                     "plots": plots,
+                    "progress": {
+                        "current": req.interactions,
+                        "total": req.interactions,
+                        "pct": 100.0,
+                    },
                     "run_dir": str(run_path),
                     "finished_at": datetime.now(timezone.utc).isoformat(),
                 }
@@ -271,18 +292,12 @@ def create_run(req: RunRequest, request: Request) -> dict[str, Any]:
             "summary": None,
             "plots": {},
             "error": None,
+            "progress": {"current": 0, "total": req.interactions, "pct": 0.0},
         }
 
     thread = threading.Thread(target=_run_job, args=(run_id, req), daemon=True)
     thread.start()
-
-    # For mock short runs, wait briefly so UI can get a quick result
-    if req.provider == "mock" and req.interactions <= 15:
-        thread.join(timeout=60)
-        with _lock:
-            return dict(_runs[run_id])
-
-    return {"run_id": run_id, "status": "queued"}
+    return {"run_id": run_id, "status": "queued", "progress": {"current": 0, "total": req.interactions, "pct": 0.0}}
 
 
 @app.get("/v1/runs/{run_id}")
