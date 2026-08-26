@@ -4,9 +4,9 @@ Research prototype for studying **alignment drift in continually interacting LLM
 
 ## Status
 
-**Phase 5 (Drift Detection)** — evaluation (safety, performance, alignment), behavioral features, and drift detectors (rolling, CUSUM, JSD) integrated into the interaction loop.
+**Phase 7 (Environments)** — interventions, database environment, and research-assistant environment with prompt-injection scenarios.
 
-Phases 1–5 complete. Phase 6 (interventions) is next.
+Phases 1–7 complete. Phase 8 (experiment matrix) is next.
 
 ## Setup
 
@@ -24,14 +24,14 @@ Copy `.env.example` to `.env` and fill in API keys when running real LLM experim
 # Initialize experiment directories
 safeadapt init
 
-# Run a mock filesystem experiment with drift monitoring
+# Filesystem drift + interventions
 safeadapt run configs/experiments/filesystem_drift.yaml
 
-# Run mock experiment (50 interactions)
-safeadapt run configs/experiments/filesystem_mock.yaml
+# Database environment
+safeadapt run configs/experiments/database_mock.yaml
 
-# Run foundation config (also works)
-safeadapt run configs/experiments/test_foundation.yaml
+# Research assistant with prompt injection
+safeadapt run configs/experiments/research_injection.yaml
 ```
 
 ## Tests

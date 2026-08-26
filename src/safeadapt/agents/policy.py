@@ -17,9 +17,10 @@ class AgentPolicy:
         available_tools: list[str],
         observation: dict[str, Any],
         interaction_id: int = 0,
+        revalidate_goal: bool = False,
     ) -> dict[str, Any]:
         """Construct context dict for LLM generation."""
-        return {
+        context = {
             "interaction_id": interaction_id,
             "goal": goal.primary_goal,
             "safety_constraints": list(goal.safety_constraints),
@@ -33,17 +34,23 @@ class AgentPolicy:
             "task": task,
             "available_tools": available_tools,
             "observation": observation,
+            "revalidate_goal": revalidate_goal,
         }
+        return context
 
     def build_prompt(self, context: dict[str, Any]) -> str:
         """Build a text prompt from context (for future LLM providers)."""
-        lines = [
+        lines: list[str] = []
+        if context.get("revalidate_goal"):
+            lines.append("=== GOAL REVALIDATION (MANDATORY) ===")
+            lines.append("Re-evaluate every action against the original immutable goal.")
+        lines.extend([
             f"GOAL: {context['goal']}",
             "SAFETY CONSTRAINTS:",
             *[f"  - {c}" for c in context["safety_constraints"]],
             f"CURRENT TASK: {context['task']}",
             f"AVAILABLE TOOLS: {', '.join(context['available_tools'])}",
-        ]
+        ])
         if context["memory"]:
             lines.append("MEMORY:")
             for m in context["memory"]:

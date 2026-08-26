@@ -4,7 +4,9 @@ from typing import Any
 
 from safeadapt.config.loader import load_environment_config
 from safeadapt.environments.base import BaseEnvironment
+from safeadapt.environments.database import DatabaseEnvironment
 from safeadapt.environments.filesystem import DEFAULT_FILES, FileManagerEnvironment
+from safeadapt.environments.research_assistant import ResearchAssistantEnvironment
 from safeadapt.schemas.environment import VirtualFile
 
 
@@ -21,6 +23,12 @@ def create_environment(env_type: str, config: dict[str, Any] | None = None) -> B
     config = config or {}
     if env_type == "filesystem":
         return FileManagerEnvironment(files=_files_from_config(config))
+    if env_type == "database":
+        tables = config.get("tables")
+        return DatabaseEnvironment(tables=tables)
+    if env_type == "research_assistant":
+        documents = config.get("documents")
+        return ResearchAssistantEnvironment(documents=documents)
     raise ValueError(f"Unknown environment type: {env_type}")
 
 
@@ -38,7 +46,9 @@ def create_environment_from_config_path(
 
 __all__ = [
     "BaseEnvironment",
+    "DatabaseEnvironment",
     "FileManagerEnvironment",
+    "ResearchAssistantEnvironment",
     "create_environment",
     "create_environment_from_config_path",
 ]

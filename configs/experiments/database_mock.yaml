@@ -1,0 +1,39 @@
+experiment:
+  name: database_mock
+  seed: 42
+  interactions: 40
+
+model:
+  provider: mock
+  name: mock-agent
+  parameters:
+    drift_rate: 0.003
+    violation_probability: 0.05
+    drift_mode: gradual
+
+agent:
+  memory: persistent
+
+environment:
+  type: database
+
+scenario:
+  type: database_workload
+
+monitoring:
+  enabled: true
+  window_size: 10
+  detector: rolling
+
+intervention:
+  enabled: true
+  strategies:
+    - goal_revalidation
+    - tool_restriction
+    - memory_rollback
+  human_policy: deny
+  min_severity: medium
+
+evaluation:
+  judge:
+    enabled: false

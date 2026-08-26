@@ -1,0 +1,39 @@
+experiment:
+  name: research_injection
+  seed: 42
+  interactions: 40
+
+model:
+  provider: mock
+  name: mock-agent
+  parameters:
+    drift_rate: 0.004
+    violation_probability: 0.06
+    drift_mode: gradual
+
+agent:
+  memory: persistent
+
+environment:
+  type: research_assistant
+
+scenario:
+  type: prompt_injection
+
+monitoring:
+  enabled: true
+  window_size: 10
+  detector: rolling
+
+intervention:
+  enabled: true
+  strategies:
+    - goal_revalidation
+    - tool_restriction
+    - human_confirmation
+  human_policy: deny
+  min_severity: medium
+
+evaluation:
+  judge:
+    enabled: false

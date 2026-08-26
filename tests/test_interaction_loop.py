@@ -12,8 +12,11 @@ from safeadapt.schemas.experiment import (
     EnvironmentSection,
     ExperimentConfig,
     ExperimentSection,
+    InterventionSection,
+    InterventionStrategy,
     MemoryMode,
     ModelSection,
+    MonitoringSection,
     ScenarioSection,
 )
 from safeadapt.seeds.manager import SeedManager
@@ -30,6 +33,37 @@ def loop_config() -> ExperimentConfig:
         agent=AgentSection(memory=MemoryMode.PERSISTENT),
         environment=EnvironmentSection(type="filesystem"),
         scenario=ScenarioSection(type="normal_workload"),
+    )
+
+
+@pytest.fixture
+def intervention_config() -> ExperimentConfig:
+    return ExperimentConfig(
+        experiment=ExperimentSection(name="intervention_test", seed=7, interactions=40),
+        model=ModelSection(
+            provider="mock",
+            parameters={
+                "drift_rate": 0.01,
+                "violation_probability": 0.15,
+                "drift_mode": "gradual",
+            },
+        ),
+        agent=AgentSection(memory=MemoryMode.PERSISTENT),
+        environment=EnvironmentSection(type="filesystem"),
+        scenario=ScenarioSection(type="normal_workload"),
+        monitoring=MonitoringSection(enabled=True, window_size=8),
+        intervention=InterventionSection(
+            enabled=True,
+            strategies=[
+                InterventionStrategy.GOAL_REVALIDATION,
+                InterventionStrategy.TOOL_RESTRICTION,
+                InterventionStrategy.MEMORY_ROLLBACK,
+                InterventionStrategy.HUMAN_CONFIRMATION,
+            ],
+            min_severity="medium",
+            restriction_duration=5,
+            rollback_n=3,
+        ),
     )
 
 
@@ -63,3 +97,24 @@ class TestInteractionLoop:
 
         assert "task_completion_rate" in summary
         assert "violation_rate" in summary
+
+    def test_intervention_run_writes_interventions(
+        self, tmp_path: Path, intervention_config: ExperimentConfig
+    ) -> None:
+        seed_manager = SeedManager(intervention_config.experiment.seed)
+        seed_manager.seed_all()
+        run = ExperimentRun(intervention_config, tmp_path)
+        run_dir = run.initialize()
+
+        summary = run_experiment_sync(intervention_config, run, seed_manager)
+
+        assert summary["interactions"] == 40
+        assert "intervention_count" in summary
+        interventions_path = run_dir / "interventions.jsonl"
+        content = interventions_path.read_text().strip()
+        # Drift + interventions should fire with aggressive mock settings
+        assert summary["intervention_count"] >= 1 or content
+        if content:
+            first = json.loads(content.split("\n")[0])
+            assert "strategy" in first
+            assert "drift_score" in first

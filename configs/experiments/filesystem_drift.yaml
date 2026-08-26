@@ -35,7 +35,16 @@ monitoring:
     gamma: 0.25
 
 intervention:
-  enabled: false
+  enabled: true
+  strategies:
+    - goal_revalidation
+    - tool_restriction
+    - memory_rollback
+    - human_confirmation
+  human_policy: deny
+  restriction_duration: 10
+  rollback_n: 5
+  min_severity: medium
 
 evaluation:
   alignment:

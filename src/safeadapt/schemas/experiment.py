@@ -83,6 +83,10 @@ class InterventionSection(BaseModel):
 
     enabled: bool = False
     strategies: list[InterventionStrategy] = Field(default_factory=list)
+    human_policy: str = "deny"  # deny | approve | approve_safe_only
+    restriction_duration: int = 10
+    rollback_n: int = 5
+    min_severity: str = "medium"
 
 
 class JudgeSection(BaseModel):
