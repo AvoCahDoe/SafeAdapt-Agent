@@ -4,9 +4,9 @@ Research prototype for studying **alignment drift in continually interacting LLM
 
 ## Status
 
-**Phase 7 (Environments)** — interventions, database environment, and research-assistant environment with prompt-injection scenarios.
+**Phase 9 (Analysis)** — experiment matrix (C1–C5), ablations, statistics, plots, and report CLI.
 
-Phases 1–7 complete. Phase 8 (experiment matrix) is next.
+Phases 1–9 complete. Phase 10 (real LLM providers) is next.
 
 ## Setup
 
@@ -16,22 +16,24 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-Copy `.env.example` to `.env` and fill in API keys when running real LLM experiments (Phase 10).
-
 ## Usage
 
 ```bash
-# Initialize experiment directories
 safeadapt init
 
-# Filesystem drift + interventions
+# Single run
 safeadapt run configs/experiments/filesystem_drift.yaml
 
-# Database environment
-safeadapt run configs/experiments/database_mock.yaml
+# Experiment matrix (C1–C5 × seeds)
+safeadapt matrix configs/experiments/matrix_dev.yaml
 
-# Research assistant with prompt injection
-safeadapt run configs/experiments/research_injection.yaml
+# Ablations A–G
+safeadapt ablation configs/experiments/ablation_dev.yaml
+
+# Analysis pipeline on results
+safeadapt analyze experiments/results/<id>
+safeadapt plot experiments/results/<id>
+safeadapt report experiments/results/<id>
 ```
 
 ## Tests
@@ -40,6 +42,4 @@ safeadapt run configs/experiments/research_injection.yaml
 pytest -v
 ```
 
-## Project Structure
-
-See `plan.md` for the full implementation specification.
+See `plan.md` for the full specification.

@@ -18,6 +18,7 @@ env/
 
 # Experiment outputs
 experiments/runs/
+experiments/results/
 
 # Testing
 .pytest_cache/
