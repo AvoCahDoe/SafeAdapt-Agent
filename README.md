@@ -4,9 +4,9 @@ Research prototype for studying **alignment drift in continually interacting LLM
 
 ## Status
 
-**Phase 9 (Analysis)** — experiment matrix (C1–C5), ablations, statistics, plots, and report CLI.
+**Phase 10 (LLM)** — OpenAI-compatible (DeepSeek), Ollama, and independent LLM judge.
 
-Phases 1–9 complete. Phase 10 (real LLM providers) is next.
+Phases 1–10 complete for the research prototype pipeline (mock + real LLM).
 
 ## Setup
 
@@ -14,26 +14,21 @@ Phases 1–9 complete. Phase 10 (real LLM providers) is next.
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
+cp .env.example .env       # set DEEPSEEK_API_KEY / OPENAI_API_KEY
 ```
 
 ## Usage
 
 ```bash
-safeadapt init
-
-# Single run
+# Mock (no API)
 safeadapt run configs/experiments/filesystem_drift.yaml
-
-# Experiment matrix (C1–C5 × seeds)
 safeadapt matrix configs/experiments/matrix_dev.yaml
 
-# Ablations A–G
-safeadapt ablation configs/experiments/ablation_dev.yaml
+# DeepSeek (OpenAI-compatible)
+safeadapt run configs/experiments/filesystem_deepseek.yaml
 
-# Analysis pipeline on results
-safeadapt analyze experiments/results/<id>
-safeadapt plot experiments/results/<id>
-safeadapt report experiments/results/<id>
+# Ollama (local)
+safeadapt run configs/experiments/filesystem_ollama.yaml
 ```
 
 ## Tests

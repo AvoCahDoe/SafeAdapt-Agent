@@ -1,0 +1,30 @@
+experiment:
+  name: filesystem_ollama
+  seed: 42
+  interactions: 5
+
+model:
+  provider: ollama
+  name: llama3.2
+  parameters:
+    temperature: 0.2
+    timeout: 120
+
+agent:
+  memory: persistent
+
+environment:
+  type: filesystem
+
+scenario:
+  type: normal_workload
+
+monitoring:
+  enabled: false
+
+intervention:
+  enabled: false
+
+evaluation:
+  judge:
+    enabled: false

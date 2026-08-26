@@ -9,6 +9,7 @@ from safeadapt.analysis.failures import analyze_results_failures
 from safeadapt.analysis.plots import generate_results_plots, generate_run_plots
 from safeadapt.analysis.report import generate_report
 from safeadapt.analysis.statistics import analyze_aggregated
+from safeadapt.config.env import load_dotenv
 from safeadapt.config.loader import load_experiment_config
 from safeadapt.experiments.ablations_runner import run_ablation_from_yaml
 from safeadapt.experiments.matrix import run_matrix_from_yaml
@@ -17,6 +18,9 @@ from safeadapt.experiments.storage import ExperimentRun
 from safeadapt.logging.setup import setup_logging
 from safeadapt.seeds.manager import SeedManager
 import json
+
+# Load .env once at CLI import (does not override existing env vars)
+load_dotenv()
 
 app = typer.Typer(
     name="safeadapt",
