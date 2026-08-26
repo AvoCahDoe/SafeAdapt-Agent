@@ -31,6 +31,23 @@ safeadapt run configs/experiments/filesystem_deepseek.yaml
 safeadapt run configs/experiments/filesystem_ollama.yaml
 ```
 
+## Web showcase
+
+Public UI (Next.js on Vercel) + API (FastAPI on Render):
+
+```bash
+# API
+pip install -e ".[dev]" && pip install -r api/requirements.txt
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Frontend
+cd web && cp .env.example .env.local
+# set NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+npm install && npm run dev
+```
+
+Regenerate committed showcase plots: `PYTHONPATH=src python scripts/export_showcase.py`
+
 ## Tests
 
 ```bash
