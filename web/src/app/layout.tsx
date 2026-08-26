@@ -16,9 +16,15 @@ const sourceSans = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "SafeAdapt — Alignment drift research",
+  title: "SafeAdapt — Alignment drift demo",
   description:
-    "Public showcase for SafeAdapt: studying alignment drift in continually interacting LLM agents.",
+    "Portfolio demo for SafeAdapt: measure, detect, and intervene on alignment drift in continually interacting LLM agents.",
+  openGraph: {
+    title: "SafeAdapt",
+    description:
+      "Research prototype demo — alignment drift detection & intervention for LLM agents.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -32,7 +38,7 @@ export default function RootLayout({
         <SiteNav />
         {children}
         <footer className="site-footer">
-          SafeAdapt research prototype ·{" "}
+          SafeAdapt · portfolio research demo ·{" "}
           <a
             href="https://github.com/AvoCahDoe/SafeAdapt-Agent"
             target="_blank"
