@@ -1,28 +1,142 @@
 # SafeAdapt showcase excerpt
 
 - Interactions: 40
-- Seeds: [42, 43]
-- Conditions: C1, C5
+- Seeds: [42, 43, 44]
+- Conditions: C1, C2, C3, C4, C5
 
 ## Metrics
 
 ```json
 {
   "C1": {
-    "mean_alignment": 0.758875,
-    "violation_rate": 0.3125,
+    "mean_alignment": 0.7611249999999999,
+    "violation_rate": 0.30833333333333335,
     "drift_detections": 0.0,
     "intervention_count": 0.0,
-    "task_completion_rate": 0.675,
-    "n_runs": 2
+    "task_completion_rate": 0.6750000000000002,
+    "action_success_rate": 0.6750000000000002,
+    "n_runs": 3,
+    "per_seed": {
+      "mean_alignment": [
+        0.746875,
+        0.770875,
+        0.765625
+      ],
+      "violation_rate": [
+        0.325,
+        0.3,
+        0.3
+      ],
+      "task_completion_rate": [
+        0.65,
+        0.7,
+        0.675
+      ]
+    }
+  },
+  "C2": {
+    "mean_alignment": 0.7611249999999999,
+    "violation_rate": 0.30833333333333335,
+    "drift_detections": 0.0,
+    "intervention_count": 0.0,
+    "task_completion_rate": 0.6750000000000002,
+    "action_success_rate": 0.6750000000000002,
+    "n_runs": 3,
+    "per_seed": {
+      "mean_alignment": [
+        0.746875,
+        0.770875,
+        0.765625
+      ],
+      "violation_rate": [
+        0.325,
+        0.3,
+        0.3
+      ],
+      "task_completion_rate": [
+        0.65,
+        0.7,
+        0.675
+      ]
+    }
+  },
+  "C3": {
+    "mean_alignment": 0.6633750000000002,
+    "violation_rate": 0.325,
+    "drift_detections": 0.0,
+    "intervention_count": 0.0,
+    "task_completion_rate": 0.47500000000000003,
+    "action_success_rate": 0.47500000000000003,
+    "n_runs": 3,
+    "per_seed": {
+      "mean_alignment": [
+        0.6152500000000002,
+        0.6527500000000002,
+        0.7221250000000001
+      ],
+      "violation_rate": [
+        0.375,
+        0.35,
+        0.25
+      ],
+      "task_completion_rate": [
+        0.4,
+        0.475,
+        0.55
+      ]
+    }
+  },
+  "C4": {
+    "mean_alignment": 0.7202500000000001,
+    "violation_rate": 0.31666666666666665,
+    "drift_detections": 25.666666666666668,
+    "intervention_count": 0.0,
+    "task_completion_rate": 0.6,
+    "action_success_rate": 0.6,
+    "n_runs": 3,
+    "per_seed": {
+      "mean_alignment": [
+        0.710875,
+        0.6827500000000002,
+        0.7671250000000001
+      ],
+      "violation_rate": [
+        0.325,
+        0.375,
+        0.25
+      ],
+      "task_completion_rate": [
+        0.575,
+        0.575,
+        0.65
+      ]
+    }
   },
   "C5": {
-    "mean_alignment": 0.6743125000000001,
-    "violation_rate": 0.4,
-    "drift_detections": 27.0,
-    "intervention_count": 32.5,
-    "task_completion_rate": 0.575,
-    "n_runs": 2
+    "mean_alignment": 0.70525,
+    "violation_rate": 0.35000000000000003,
+    "drift_detections": 25.666666666666668,
+    "intervention_count": 26.0,
+    "task_completion_rate": 0.6,
+    "action_success_rate": 0.6,
+    "n_runs": 3,
+    "per_seed": {
+      "mean_alignment": [
+        0.6883750000000001,
+        0.6602500000000002,
+        0.7671250000000001
+      ],
+      "violation_rate": [
+        0.375,
+        0.425,
+        0.25
+      ],
+      "task_completion_rate": [
+        0.575,
+        0.575,
+        0.65
+      ]
+    }
   }
 }
 ```

@@ -417,6 +417,122 @@ a:hover {
   width: min(820px, calc(100% - 2rem));
 }
 
+.results-page {
+  width: min(960px, calc(100% - 2rem));
+}
+
+.results-hero {
+  margin-bottom: 0.5rem;
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+  color: var(--ink-muted);
+}
+
+.toc a:hover {
+  color: var(--accent);
+}
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.metric-value.sm {
+  font-size: 1.15rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 1rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.results-table th,
+.results-table td {
+  text-align: left;
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.results-table th {
+  color: var(--ink-muted);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.results-table code {
+  color: var(--accent);
+}
+
+.delta-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.chart-intro {
+  margin: 0 0 1.5rem;
+}
+
+.interpretation {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  max-width: 62ch;
+}
+
+.interpretation-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-2);
+}
+
+.findings-list {
+  color: var(--ink-muted);
+  padding-left: 1.2rem;
+  max-width: 62ch;
+}
+
+.findings-list li {
+  margin-bottom: 0.85rem;
+}
+
+.findings-list strong {
+  color: var(--ink);
+}
+
+.findings code {
+  font-size: 0.85em;
+  background: var(--bg-2);
+  padding: 0.1em 0.35em;
+  border-radius: 2px;
+}
+
 .formula-strip .math-block {
   margin: 1rem 0;
   overflow-x: auto;

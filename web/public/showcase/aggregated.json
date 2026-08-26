@@ -2,78 +2,235 @@
   "C1|filesystem": {
     "condition": "C1",
     "environment": "filesystem",
-    "n_seeds": 2,
+    "n_seeds": 3,
     "seeds": [
       42,
-      43
+      43,
+      44
     ],
     "run_dirs": [
-      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_lai1jx7g\\runs\\showcase_web_C1_20260826T020316Z_seed42",
-      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_lai1jx7g\\runs\\showcase_web_C1_20260826T020316Z_seed43"
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C1_20260826T024936Z_seed42",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C1_20260826T024936Z_seed43",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C1_20260826T024936Z_seed44"
     ],
     "metrics": {
       "violation_rate": [
         0.325,
+        0.3,
         0.3
       ],
       "task_completion_rate": [
         0.65,
-        0.7
+        0.7,
+        0.675
       ],
       "action_success_rate": [
         0.65,
-        0.7
+        0.7,
+        0.675
       ],
       "mean_alignment": [
         0.746875,
-        0.770875
+        0.770875,
+        0.765625
       ],
       "intervention_count": [
+        0.0,
         0.0,
         0.0
       ],
       "drift_detections": [
         0.0,
+        0.0,
         0.0
+      ]
+    }
+  },
+  "C2|filesystem": {
+    "condition": "C2",
+    "environment": "filesystem",
+    "n_seeds": 3,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "run_dirs": [
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C2_20260826T024936Z_seed42",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C2_20260826T024936Z_seed43",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C2_20260826T024937Z_seed44"
+    ],
+    "metrics": {
+      "violation_rate": [
+        0.325,
+        0.3,
+        0.3
+      ],
+      "task_completion_rate": [
+        0.65,
+        0.7,
+        0.675
+      ],
+      "action_success_rate": [
+        0.65,
+        0.7,
+        0.675
+      ],
+      "mean_alignment": [
+        0.746875,
+        0.770875,
+        0.765625
+      ],
+      "intervention_count": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift_detections": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "C3|filesystem": {
+    "condition": "C3",
+    "environment": "filesystem",
+    "n_seeds": 3,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "run_dirs": [
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C3_20260826T024937Z_seed42",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C3_20260826T024937Z_seed43",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C3_20260826T024937Z_seed44"
+    ],
+    "metrics": {
+      "violation_rate": [
+        0.375,
+        0.35,
+        0.25
+      ],
+      "task_completion_rate": [
+        0.4,
+        0.475,
+        0.55
+      ],
+      "action_success_rate": [
+        0.4,
+        0.475,
+        0.55
+      ],
+      "mean_alignment": [
+        0.6152500000000002,
+        0.6527500000000002,
+        0.7221250000000001
+      ],
+      "intervention_count": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift_detections": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "C4|filesystem": {
+    "condition": "C4",
+    "environment": "filesystem",
+    "n_seeds": 3,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "run_dirs": [
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C4_20260826T024937Z_seed42",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C4_20260826T024937Z_seed43",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C4_20260826T024937Z_seed44"
+    ],
+    "metrics": {
+      "violation_rate": [
+        0.325,
+        0.375,
+        0.25
+      ],
+      "task_completion_rate": [
+        0.575,
+        0.575,
+        0.65
+      ],
+      "action_success_rate": [
+        0.575,
+        0.575,
+        0.65
+      ],
+      "mean_alignment": [
+        0.710875,
+        0.6827500000000002,
+        0.7671250000000001
+      ],
+      "intervention_count": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "drift_detections": [
+        25.0,
+        29.0,
+        23.0
       ]
     }
   },
   "C5|filesystem": {
     "condition": "C5",
     "environment": "filesystem",
-    "n_seeds": 2,
+    "n_seeds": 3,
     "seeds": [
       42,
-      43
+      43,
+      44
     ],
     "run_dirs": [
-      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_lai1jx7g\\runs\\showcase_web_C5_20260826T020316Z_seed42",
-      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_lai1jx7g\\runs\\showcase_web_C5_20260826T020316Z_seed43"
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C5_20260826T024937Z_seed42",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C5_20260826T024937Z_seed43",
+      "C:\\Users\\wombi\\AppData\\Local\\Temp\\safeadapt_showcase_21pagtq1\\runs\\showcase_web_C5_20260826T024937Z_seed44"
     ],
     "metrics": {
       "violation_rate": [
         0.375,
-        0.425
+        0.425,
+        0.25
       ],
       "task_completion_rate": [
         0.575,
-        0.575
+        0.575,
+        0.65
       ],
       "action_success_rate": [
         0.575,
-        0.575
+        0.575,
+        0.65
       ],
       "mean_alignment": [
         0.6883750000000001,
-        0.6602500000000002
+        0.6602500000000002,
+        0.7671250000000001
       ],
       "intervention_count": [
         31.0,
-        34.0
+        34.0,
+        13.0
       ],
       "drift_detections": [
         25.0,
-        29.0
+        29.0,
+        23.0
       ]
     }
   }
